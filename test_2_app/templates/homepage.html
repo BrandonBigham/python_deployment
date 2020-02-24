@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quote dashboard</title>
+<style>
+    .add_a_quote{
+        display:inline-block;
+        vertical-align: top;
+        width: 35%;
+    }
+    .quotes{
+        display:inline-block;
+        vertical-align: top;
+        width: 45%;
+    }
+    .individual_quote{
+        border: 3px solid black;
+        max-width: 200px;
+        max-height: fit-content;
+        padding: 5px;
+        vertical-align: top;
+    }
+    .individual_quote form{
+        display:inline-block;
+    }
+    .header{
+        display: inline-block;
+        vertical-align: top;
+        margin-left: 500px;
+    }
+    h1{
+        display: inline-block;
+    }
+
+</style>
+</head>
+<body>
+    <h1>Hello <a href="/user/{{user.id}}">{{user.first_name}}</a>!</h1><p class="header"><a class ="redirects" href="/edit/{{user.id}}">Edit my account</a> <a class="redirects" href="/logout">Logout</a></p>
+    <div class="quotes">
+        <h2>Quotes</h2>
+        {%for post in all_posts%}
+            <div class="individual_quote">
+                {{post.author}}: {{post.quote}}
+                <br>
+                <br>
+                Posted by <a href="/user/{{post.owner.id}}">{{post.owner.first_name}} {{post.owner.last_name}}</a>
+                <br>
+                <br>
+                <p>
+                {% if post not in user.cats_voted_for.all %}
+                    <form action="/like/{{post.id}}" method="POST">
+                        {% csrf_token %}
+                        <input type="submit" value="Like">
+                    </form>
+                {%else%}
+                    <form action="/unlike/{{post.id}}" method="POST">
+                        {% csrf_token %}
+                        <input type="submit" value="Unlike">
+                    </form>
+                {%endif%}
+                {% if post.owner.id == user.id %}
+                    <form action='/delete/{{post.id}}' method='POST'>
+                        {% csrf_token %}
+                        <input type="submit" value='Delete'>
+                    </form>
+                {% endif %}
+                </p>
+                {{post.likes.count}} people like this
+            </div>
+            <br>
+        {%endfor%}
+    </div>
+    <div class="add_a_quote">
+        <h2>Add a Quote</h2>
+        {% if messages %}
+            <ul>
+                {% for message in messages %}
+                    <li>{{message}}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        <form action="/createpost" method="POST">
+            {% csrf_token %}
+            Author: <input type="textarea" name="author">
+            <br>
+            Quote: <input type="textarea" name="quote">
+            <br>
+            <input type="submit" value="Add Quote">
+        </form>
+    </div>
+</body>
+</html>
